@@ -11,7 +11,7 @@
  *  - Mean and standard deviation of grayscale pixel intensities
  *  - Minimum and maximum grayscale values
  *  - Dynamic range calculation (max - min)
- *  - Colorfulness metric (based on Hasler and Süsstrunk's method)
+ *  - Colorfulness metric (based on Hasler and SÃ¼sstrunk's method)
  *  - Entropy measurement (indicates the information content or randomness of the image)
  *
  * The function `get_image_statistics` returns a `std::tuple` containing all these values in a structured form,
@@ -31,7 +31,7 @@
  *
  * Explanation Source:
  * All algorithmic techniques and image processing insights are detailed on the blog:
- * https://thecolorcode.net — authored by Agustin Tortolero
+ * https://thecolorcode.net â€” authored by Agustin Tortolero
  */
 
 #include <opencv2/opencv.hpp>
@@ -45,7 +45,7 @@
 
 int main() {
 
-    std::string imagePath = "C:/tests_images/tomtk.jpeg";
+    std::string imagePath = "PATH_TO_IMG";
 
     cv::Mat image = cv::imread(imagePath, cv::IMREAD_UNCHANGED); 
 
