@@ -11,7 +11,7 @@
  *  - Mean and standard deviation of grayscale pixel intensities
  *  - Minimum and maximum grayscale values
  *  - Dynamic range calculation (max - min)
- *  - Colorfulness metric (based on Hasler and Süsstrunk's method)
+ *  - Colorfulness metric (based on Hasler and SÃ¼sstrunk's method)
  *  - Entropy measurement (indicates the information content or randomness of the image)
  *
  * The function `get_image_statistics` returns a `std::tuple` containing all these values in a structured form,
@@ -31,7 +31,7 @@
  *
  * Explanation Source:
  * All algorithmic techniques and image processing insights are detailed on the blog:
- * https://thecolorcode.net — authored by Agustin Tortolero
+ * https://thecolorcode.net â€” authored by Agustin Tortolero
  */
 
 // internally, cv::cvtColor(input, luminance, cv::COLOR_BGR2GRAY); does luminanse conversion.
@@ -123,41 +123,33 @@ double get_entropy(const cv::Mat& input) {
 
 
 double get_colorfulness(const cv::Mat& input) {
+    // Step 1: Convert image from RGB to YCbCr.
     cv::Mat image;
-    input.convertTo(image, CV_32F);
+    input.convertTo(image, CV_32F);  // Convert to float for precision
 
-    // Convert the image from BGR (RGB) to YCbCr
     cv::Mat ycbcr_image;
     cv::cvtColor(image, ycbcr_image, cv::COLOR_BGR2YCrCb);
 
-    // Split the YCbCr image into its channels (Y, Cb, Cr)
+    // Step 2: Compute chrominance standard deviations (Cb and Cr).
     std::vector<cv::Mat> channels(3);
     cv::split(ycbcr_image, channels);
 
-    cv::Mat Cb = channels[1];  // Cb channel
-    cv::Mat Cr = channels[2];  // Cr channel
+    cv::Mat Cb = channels[1];  // Cb channel (Chrominance Blue)
+    cv::Mat Cr = channels[2];  // Cr channel (Chrominance Red)
 
-    // Calculate the differences (Cb - Cr) and (0.5 * (Cb + Cr) - Y) if necessary
+    // Compute the difference between Cb and Cr for color difference
     cv::Mat cb_cr = Cb - Cr;
-    cv::Mat yb = 0.5 * (Cb + Cr) - channels[0];  // Y is the first channel (channels[0])
 
-    // Compute the mean and standard deviation for both channels
-    cv::Scalar mean_cb_cr, stddev_cb_cr, mean_yb, stddev_yb;
-    cv::meanStdDev(cb_cr, mean_cb_cr, stddev_cb_cr);
-    cv::meanStdDev(yb, mean_yb, stddev_yb);
+    // Step 3: Compute chrominance means (mean of Cb-Cr).
+    cv::Scalar mean_cb_cr, stddev_cb_cr;
+    cv::meanStdDev(cb_cr, mean_cb_cr, stddev_cb_cr);  // Compute mean and standard deviation of Cb-Cr
 
-    // Get standard deviations and means
+    // Get standard deviation and mean values for Cb-Cr
     double std_cb_cr = stddev_cb_cr[0];
-    double std_yb = stddev_yb[0];
     double mean_cb_cr_val = mean_cb_cr[0];
-    double mean_yb_val = mean_yb[0];
 
-    // Combine the standard deviations and means
-    double std_root = std::sqrt(std_cb_cr * std_cb_cr + std_yb * std_yb);
-    double mean_root = std::sqrt(mean_cb_cr_val * mean_cb_cr_val + mean_yb_val * mean_yb_val);
-
-    // Return the colorfulness score
-    return std_root + 0.3 * mean_root;
+    // Step 4: Calculate overall colorfulness.
+    return std_cb_cr + 0.3 * mean_cb_cr_val;  // Formula to compute colorfulness
 }
 
 
